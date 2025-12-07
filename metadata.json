@@ -1,0 +1,7 @@
+{
+  "name": "Service Request App",
+  "description": "A mobile-first service request form for home maintenance with photo uploads and scheduling.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
