@@ -92,12 +92,7 @@ const App: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (GOOGLE_SHEET_URL.includes("PLACEHOLDER")) {
-      alert("Por favor configura la URL de Google Apps Script en constants.ts primero.");
-      return;
-    }
-
-    // Run Validation
+    // 1. Validar formulario ANTES de verificar la URL
     if (!validateForm()) {
       return;
     }
@@ -113,6 +108,19 @@ const App: React.FC = () => {
       schedule,
       photos: photos.map(p => p.url) // Note: Local blob URLs won't be accessible by Google Sheets, only public URLs
     };
+
+    // 2. Modo Demo: Si no hay URL configurada, simulamos el éxito
+    if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("PLACEHOLDER")) {
+      console.log("MODO DEMO - Datos que se enviarían:", payload);
+      
+      // Simular delay de red
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      alert('¡Solicitud enviada con éxito! (Modo Demo: Configura la URL de Google Sheets para guardar datos reales)');
+      resetForm();
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       // We use 'no-cors' mode usually for Google Apps Script to avoid CORS errors in simple client setups,
