@@ -31,7 +31,7 @@ export const INITIAL_PHONE = "";
 // CONFIGURACIÓN DE URL
 // =========================================================================================
 // Opción A (Más fácil): Pega tu URL de Google Apps Script (que termina en /exec) aquí abajo:
-export const MANUAL_SHEET_URL = "https://script.google.com/macros/s/AKfycbx7cTEXSLUHiKR03gaKUtlciJaN6KIBu8_XnT71BpRRz-JeW8XOdXmyfANqxa0iVBTU/exec"; 
+export const MANUAL_SHEET_URL = "https://script.google.com/macros/s/AKfycbw0GacVPwu5az9lWTN1ZMyLPkjYca_5OryW_5o1xyqtboYi5XWW2vpe3ikRTiyNxpYO/exec"; 
 
 // Opción B (Avanzada): Usa variables de entorno en Vercel (VITE_GOOGLE_SHEET_URL)
 // La lógica abajo prioriza: Manual -> Variable de Entorno -> Placeholder
