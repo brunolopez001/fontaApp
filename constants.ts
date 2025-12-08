@@ -32,7 +32,10 @@ export const INITIAL_PHONE = "";
 export const GOOGLE_SHEET_URL = (import.meta as any)?.env?.VITE_GOOGLE_SHEET_URL || "PLACEHOLDER";
 
 /* 
-=== CÓDIGO GOOGLE APPS SCRIPT (Copia y pega esto en tu Google Sheet) ===
+=== INSTRUCCIONES GOOGLE APPS SCRIPT ===
+
+1. Ve a tu Google Sheet -> Extensiones -> Apps Script
+2. Pega el siguiente código:
 
 function doPost(e) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
@@ -53,4 +56,13 @@ function doPost(e) {
   return ContentService.createTextOutput(JSON.stringify({ "result": "success" }))
     .setMimeType(ContentService.MimeType.JSON);
 }
+
+3. IMPORTANTE - Al Implementar:
+   - Haz clic en "Implementar" > "Nueva implementación"
+   - Selecciona "Aplicación web"
+   - Descripción: "Versión 1"
+   - Ejecutar como: "Yo" (Tu cuenta de email)  <--- MUY IMPORTANTE
+   - Quién tiene acceso: "Cualquier usuario"  <--- MUY IMPORTANTE (Si eliges "Solo yo", la app fallará)
+   
+4. Copia la URL que termina en /exec y pégala en Vercel como variable de entorno VITE_GOOGLE_SHEET_URL.
 */

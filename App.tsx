@@ -123,13 +123,16 @@ const App: React.FC = () => {
     }
 
     try {
-      // We use 'no-cors' mode usually for Google Apps Script to avoid CORS errors in simple client setups,
-      // strictly speaking this makes the response opaque, but it sends the data.
-      // However, sending as text/plain often bypasses the strict preflight check if the server accepts it.
+      // USANDO MODE: 'no-cors'
+      // Esto es crucial para Google Apps Script. 
+      // Permite enviar los datos (fire and forget) sin que el navegador bloquee la respuesta por CORS.
+      // La desventaja es que la respuesta es "opaca" (no podemos leer el JSON de respuesta),
+      // pero si no hay error de red, asumimos que llegó bien.
       await fetch(GOOGLE_SHEET_URL, {
         method: 'POST',
+        mode: 'no-cors', 
         headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
+          'Content-Type': 'text/plain',
         },
         body: JSON.stringify(payload)
       });
@@ -137,8 +140,8 @@ const App: React.FC = () => {
       alert('¡Solicitud enviada con éxito! Nos pondremos en contacto contigo pronto.');
       resetForm();
     } catch (error) {
-      console.error(error);
-      alert('Hubo un error al enviar la solicitud. Por favor intenta de nuevo.');
+      console.error("Error al enviar formulario:", error);
+      alert('Hubo un error de conexión al enviar la solicitud. Por favor intenta de nuevo.');
     } finally {
       setIsSubmitting(false);
     }
