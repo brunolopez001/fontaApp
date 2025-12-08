@@ -27,42 +27,66 @@ export const INITIAL_DESCRIPTION = "";
 export const INITIAL_NAME = "";
 export const INITIAL_PHONE = "";
 
-// En Vite (y Vercel), las variables de entorno públicas deben empezar con VITE_
-// Usamos encadenamiento opcional (?.) para evitar errores si env es undefined
-export const GOOGLE_SHEET_URL = (import.meta as any)?.env?.VITE_GOOGLE_SHEET_URL || "PLACEHOLDER";
+// =========================================================================================
+// CONFIGURACIÓN DE URL
+// =========================================================================================
+// Opción A (Más fácil): Pega tu URL de Google Apps Script (que termina en /exec) aquí abajo:
+export const MANUAL_SHEET_URL = "https://script.google.com/macros/s/AKfycbx7cTEXSLUHiKR03gaKUtlciJaN6KIBu8_XnT71BpRRz-JeW8XOdXmyfANqxa0iVBTU/exec"; 
+
+// Opción B (Avanzada): Usa variables de entorno en Vercel (VITE_GOOGLE_SHEET_URL)
+// La lógica abajo prioriza: Manual -> Variable de Entorno -> Placeholder
+// =========================================================================================
+
+const ENV_URL = (import.meta as any)?.env?.VITE_GOOGLE_SHEET_URL;
+export const GOOGLE_SHEET_URL = MANUAL_SHEET_URL || ENV_URL || "PLACEHOLDER";
 
 /* 
-=== INSTRUCCIONES GOOGLE APPS SCRIPT ===
+=== INSTRUCCIONES GOOGLE APPS SCRIPT (Actualizado) ===
 
 1. Ve a tu Google Sheet -> Extensiones -> Apps Script
-2. Pega el siguiente código:
+2. Borra todo el código y pega esto:
 
 function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var data = JSON.parse(e.postData.contents);
-  var timestamp = new Date();
-  
-  sheet.appendRow([
-    timestamp,
-    data.name,
-    data.phone,
-    data.problemType,
-    data.description,
-    data.address,
-    data.schedule,
-    data.photos.join(", ")
-  ]);
-  
-  return ContentService.createTextOutput(JSON.stringify({ "result": "success" }))
-    .setMimeType(ContentService.MimeType.JSON);
+  // Lock service para evitar condiciones de carrera si hay muchos envíos
+  var lock = LockService.getScriptLock();
+  lock.tryLock(10000);
+
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    
+    // Parsear datos. Si viene como texto plano (postData.contents), lo parseamos.
+    var data = JSON.parse(e.postData.contents);
+    var timestamp = new Date();
+    
+    sheet.appendRow([
+      timestamp,
+      data.name,
+      data.phone,
+      data.problemType,
+      data.description,
+      data.address,
+      data.schedule,
+      data.photos.join(", ")
+    ]);
+    
+    // Retornar éxito JSON
+    return ContentService.createTextOutput(JSON.stringify({ "result": "success" }))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ "result": "error", "error": error.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 3. IMPORTANTE - Al Implementar:
-   - Haz clic en "Implementar" > "Nueva implementación"
-   - Selecciona "Aplicación web"
-   - Descripción: "Versión 1"
-   - Ejecutar como: "Yo" (Tu cuenta de email)  <--- MUY IMPORTANTE
-   - Quién tiene acceso: "Cualquier usuario"  <--- MUY IMPORTANTE (Si eliges "Solo yo", la app fallará)
+   - Clic "Implementar" > "Nueva implementación"
+   - Tipo: "Aplicación web"
+   - Descripción: "v2"
+   - Ejecutar como: "Yo" (Tu email)
+   - Quién tiene acceso: "Cualquier usuario"  <-- CRÍTICO
    
-4. Copia la URL que termina en /exec y pégala en Vercel como variable de entorno VITE_GOOGLE_SHEET_URL.
+4. Copia la URL (https://script.google.com/.../exec) y pégala en MANUAL_SHEET_URL arriba.
 */

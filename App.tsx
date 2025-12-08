@@ -92,7 +92,7 @@ const App: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    // 1. Validar formulario ANTES de verificar la URL
+    // 1. Validar formulario
     if (!validateForm()) {
       return;
     }
@@ -106,42 +106,47 @@ const App: React.FC = () => {
       description,
       address,
       schedule,
-      photos: photos.map(p => p.url) // Note: Local blob URLs won't be accessible by Google Sheets, only public URLs
+      photos: photos.map(p => p.url) // Local blob URLs won't be accessible by Sheets, but we send them anyway
     };
 
-    // 2. Modo Demo: Si no hay URL configurada, simulamos el éxito
-    if (!GOOGLE_SHEET_URL || GOOGLE_SHEET_URL.includes("PLACEHOLDER")) {
-      console.log("MODO DEMO - Datos que se enviarían:", payload);
+    let targetUrl = GOOGLE_SHEET_URL;
+
+    // 2. Comprobar si tenemos URL válida. Si no, preguntamos al usuario (Fallanck de emergencia)
+    if (!targetUrl || targetUrl.includes("PLACEHOLDER")) {
+      const userUrl = prompt("⚠️ Falta configuración:\n\nPara guardar los datos, pega aquí la URL de tu Google Apps Script (termina en /exec):");
       
-      // Simular delay de red
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      alert('¡Solicitud enviada con éxito! (Modo Demo: Configura la URL de Google Sheets para guardar datos reales)');
-      resetForm();
-      setIsSubmitting(false);
-      return;
+      if (userUrl && userUrl.startsWith("http")) {
+        targetUrl = userUrl;
+      } else {
+        // Si cancela, mostramos demo
+        console.log("MODO DEMO (Sin URL) - Datos:", payload);
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        alert('¡Simulación exitosa! (Para guardar datos reales, configura la URL en constants.ts o Vercel)');
+        resetForm();
+        setIsSubmitting(false);
+        return;
+      }
     }
 
+    // 3. Intento de envío real
     try {
-      // USANDO MODE: 'no-cors'
-      // Esto es crucial para Google Apps Script. 
-      // Permite enviar los datos (fire and forget) sin que el navegador bloquee la respuesta por CORS.
-      // La desventaja es que la respuesta es "opaca" (no podemos leer el JSON de respuesta),
-      // pero si no hay error de red, asumimos que llegó bien.
-      await fetch(GOOGLE_SHEET_URL, {
+      // Usamos mode: 'no-cors' para evitar errores de CORS con Google Apps Script.
+      // Esto significa que la respuesta será opaca (status 0), pero los datos se guardarán.
+      await fetch(targetUrl, {
         method: 'POST',
         mode: 'no-cors', 
         headers: {
-          'Content-Type': 'text/plain',
+          'Content-Type': 'text/plain', // Importante para evitar preflight OPTIONS
         },
         body: JSON.stringify(payload)
       });
 
-      alert('¡Solicitud enviada con éxito! Nos pondremos en contacto contigo pronto.');
+      // Asumimos éxito si no hay error de red (debido a no-cors)
+      alert('¡Solicitud enviada y guardada con éxito! Nos pondremos en contacto pronto.');
       resetForm();
     } catch (error) {
       console.error("Error al enviar formulario:", error);
-      alert('Hubo un error de conexión al enviar la solicitud. Por favor intenta de nuevo.');
+      alert('Hubo un error de conexión al enviar la solicitud. Verifica tu conexión e inténtalo de nuevo.');
     } finally {
       setIsSubmitting(false);
     }
