@@ -20,6 +20,7 @@ const ChatBot: React.FC = () => {
   useEffect(() => {
     if (!chatSessionRef.current) {
       try {
+        // Use process.env.API_KEY strictly as per @google/genai guidelines
         const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         chatSessionRef.current = ai.chats.create({
           model: 'gemini-2.5-flash',
@@ -61,7 +62,16 @@ const ChatBot: React.FC = () => {
           ...prev, 
           { 
             id: (Date.now() + 1).toString(), 
-            text: botText, 
+            text: botText || "No se pudo obtener respuesta.", 
+            sender: 'bot' 
+          }
+        ]);
+      } else {
+        setMessages((prev) => [
+          ...prev, 
+          { 
+            id: (Date.now() + 1).toString(), 
+            text: "El chat no está inicializado.", 
             sender: 'bot' 
           }
         ]);
@@ -94,7 +104,7 @@ const ChatBot: React.FC = () => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`
-          fixed bottom-24 right-4 z-50 flex size-14 items-center justify-center rounded-full shadow-xl transition-all duration-300 hover:scale-105 active:scale-95
+          fixed bottom-24 right-4 z-[100] flex size-14 items-center justify-center rounded-full shadow-xl transition-all duration-300 hover:scale-105 active:scale-95
           ${isOpen ? 'bg-text-secondary-light rotate-90' : 'bg-primary'}
           text-white
         `}
@@ -108,7 +118,7 @@ const ChatBot: React.FC = () => {
       {/* Chat Window */}
       <div
         className={`
-          fixed bottom-40 right-4 z-40 w-80 max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-border-light bg-card-light shadow-2xl dark:border-border-dark dark:bg-card-dark transition-all duration-300 origin-bottom-right
+          fixed bottom-40 right-4 z-[90] w-80 max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-border-light bg-white shadow-2xl dark:border-border-dark dark:bg-card-dark transition-all duration-300 origin-bottom-right
           ${isOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4 pointer-events-none'}
         `}
         style={{ height: '500px', maxHeight: '60vh' }}
@@ -122,7 +132,7 @@ const ChatBot: React.FC = () => {
         </div>
 
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-background-light dark:bg-background-dark/50">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-background-light dark:bg-background-dark/95">
           {messages.map((msg) => (
             <div
               key={msg.id}

@@ -21,33 +21,24 @@ export const INITIAL_PHOTOS: Photo[] = [
   }
 ];
 
-export const INITIAL_ADDRESS = "Av. Siempre Viva 742";
-export const INITIAL_SCHEDULE = ""; // Empty to force user selection via picker
+export const INITIAL_ADDRESS = "";
+export const INITIAL_SCHEDULE = "";
 export const INITIAL_DESCRIPTION = "";
 export const INITIAL_NAME = "";
 export const INITIAL_PHONE = "";
 
-// TODO: REEMPLAZA ESTA URL CON LA URL DE TU APLICACIÓN WEB DE GOOGLE APPS SCRIPT
-// Para obtenerla:
-// 1. Ve a tu Google Sheet -> Extensiones -> Apps Script
-// 2. Pega el código de abajo en el editor.
-// 3. Dale a "Implementar" -> "Nueva implementación" -> Selecciona "Aplicación web".
-// 4. En "Quién tiene acceso", selecciona "Cualquier usuario" (Anyone).
-// 5. Copia la URL generada y pégala aquí.
-export const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwz903CMYI9nNzDfaMX88ZNgqV5PCaXdKUxzxqmQM5nqPz9W0MuYIRwXbMjqOpWAfYs/exec";
-
-
+// En Vite (y Vercel), las variables de entorno públicas deben empezar con VITE_
+// Usamos encadenamiento opcional (?.) para evitar errores si env es undefined
+export const GOOGLE_SHEET_URL = (import.meta as any)?.env?.VITE_GOOGLE_SHEET_URL || "PLACEHOLDER";
 
 /* 
-=== CÓDIGO GOOGLE APPS SCRIPT ACTUALIZADO ===
+=== CÓDIGO GOOGLE APPS SCRIPT (Copia y pega esto en tu Google Sheet) ===
 
 function doPost(e) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   var data = JSON.parse(e.postData.contents);
-  
   var timestamp = new Date();
   
-  // Asume que las columnas son: Fecha, Nombre, Teléfono, Problema, Descripción, Dirección, Horario, Fotos
   sheet.appendRow([
     timestamp,
     data.name,
@@ -62,5 +53,4 @@ function doPost(e) {
   return ContentService.createTextOutput(JSON.stringify({ "result": "success" }))
     .setMimeType(ContentService.MimeType.JSON);
 }
-
 */
