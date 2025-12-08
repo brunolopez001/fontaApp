@@ -34,11 +34,10 @@ export const INITIAL_PHONE = "";
 export const MANUAL_SHEET_URL = ""; 
 
 // Opción B (Avanzada): Usa variables de entorno en Vercel (VITE_GOOGLE_SHEET_URL)
-// La lógica abajo prioriza: Manual -> Variable de Entorno -> Placeholder
+// La lógica abajo prioriza: Manual -> Variable de Entorno (inyectada por Vite) -> Placeholder
 // =========================================================================================
 
-const ENV_URL = (import.meta as any)?.env?.VITE_GOOGLE_SHEET_URL;
-export const GOOGLE_SHEET_URL = MANUAL_SHEET_URL || ENV_URL || "PLACEHOLDER";
+export const GOOGLE_SHEET_URL = MANUAL_SHEET_URL || process.env.GOOGLE_SHEET_URL || "PLACEHOLDER";
 
 /* 
 === INSTRUCCIONES GOOGLE APPS SCRIPT (Actualizado) ===
@@ -47,14 +46,11 @@ export const GOOGLE_SHEET_URL = MANUAL_SHEET_URL || ENV_URL || "PLACEHOLDER";
 2. Borra todo el código y pega esto:
 
 function doPost(e) {
-  // Lock service para evitar condiciones de carrera si hay muchos envíos
   var lock = LockService.getScriptLock();
   lock.tryLock(10000);
 
   try {
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    
-    // Parsear datos. Si viene como texto plano (postData.contents), lo parseamos.
     var data = JSON.parse(e.postData.contents);
     var timestamp = new Date();
     
@@ -69,7 +65,6 @@ function doPost(e) {
       data.photos.join(", ")
     ]);
     
-    // Retornar éxito JSON
     return ContentService.createTextOutput(JSON.stringify({ "result": "success" }))
       .setMimeType(ContentService.MimeType.JSON);
       
@@ -88,5 +83,5 @@ function doPost(e) {
    - Ejecutar como: "Yo" (Tu email)
    - Quién tiene acceso: "Cualquier usuario"  <-- CRÍTICO
    
-4. Copia la URL (https://script.google.com/.../exec) y pégala en MANUAL_SHEET_URL arriba.
+4. Copia la URL (https://script.google.com/.../exec) y pégala en Vercel como variable de entorno VITE_GOOGLE_SHEET_URL
 */

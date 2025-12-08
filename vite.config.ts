@@ -10,8 +10,9 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     define: {
-      // Definimos process.env.API_KEY para que funcione la librería de Google GenAI en el navegador
+      // Definimos process.env para que funcione la librería de Google GenAI y nuestra lógica de Sheets
       'process.env.API_KEY': JSON.stringify(env.VITE_GEMINI_API_KEY),
+      'process.env.GOOGLE_SHEET_URL': JSON.stringify(env.VITE_GOOGLE_SHEET_URL),
     },
   }
 })
